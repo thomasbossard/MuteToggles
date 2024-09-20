@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MuteToggles</string>
+    <string name="tile_label">MyLabel</string>
+</resources>
