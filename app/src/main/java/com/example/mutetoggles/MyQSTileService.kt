@@ -56,17 +56,16 @@ class MyQSTileService : TileService() {
 
 
                     when (newRingerMode) {
-                        0 -> {
-                            audioManager.ringerMode =
+                        0 -> { audioManager.ringerMode =
                                 AudioManager.RINGER_MODE_NORMAL // Ensure the mode is Normal
                             audioManager.ringerMode = AudioManager.RINGER_MODE_SILENT
-                            notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL) //WHY DOES THIS CHANGE EL FLAGO  ?? WHY GOOGLE ???? Perhaps Race condition
+                         //   notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL) //WHY DOES THIS CHANGE EL FLAGO  ?? WHY GOOGLE ???? Perhaps Race condition
                             audioManager.adjustStreamVolume(
                                 AudioManager.STREAM_RING,
                                 AudioManager.ADJUST_MUTE,
                                 0
                             )
-                           // notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL) //THE ORDER HERE IS CRUCIAL ??? VERIFY WITH MUTEX /COROUTINES
+                            notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL) //THE ORDER HERE IS CRUCIAL ??? VERIFY WITH MUTEX /COROUTINES
                             updateTile()
                         }
 
