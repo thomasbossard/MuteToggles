@@ -8,11 +8,13 @@
     tools:context=".MainActivity">
 
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center"
         android:orientation="vertical"
-        android:gravity="center">
+        tools:layout_editor_absoluteX="-16dp"
+        tools:layout_editor_absoluteY="0dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -25,27 +27,36 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
         <!-- Button widget -->
         <Button
             android:id="@+id/myButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Grant Do Not Disturb permissions" />
+
         <Button
             android:id="@+id/silentButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Silent" />
+
         <Button
             android:id="@+id/vibrateButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Vibrate" />
+
         <Button
             android:id="@+id/normalButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Normal" />
+
+        <Button
+            android:id="@+id/testButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="test" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

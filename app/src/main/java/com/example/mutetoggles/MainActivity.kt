@@ -11,8 +11,6 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,6 +32,7 @@ class MainActivity : AppCompatActivity() {
         val silentButton: Button = findViewById(R.id.silentButton)
         val vibrateButton: Button = findViewById(R.id.vibrateButton)
         val normalButton: Button = findViewById(R.id.normalButton)
+        val testButton: Button = findViewById(R.id.testButton)
 
         // Set an OnClickListener for the button
         myButton.setOnClickListener {
@@ -64,8 +63,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         silentButton.setOnClickListener {
+          //  audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+            //audioManager.ringerMode = AudioManager.RINGER_MODE_SILENT
+            //notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)
+
+            audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL // Ensure the mode is Normal
             audioManager.ringerMode = AudioManager.RINGER_MODE_SILENT
             notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)
+            audioManager.adjustStreamVolume(
+                AudioManager.STREAM_RING,
+                AudioManager.ADJUST_MUTE,
+                0
+            )
         }
 
         vibrateButton.setOnClickListener {
@@ -74,8 +83,16 @@ class MainActivity : AppCompatActivity() {
 
         normalButton.setOnClickListener {
             audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+           audioManager.adjustStreamVolume(
+         AudioManager.STREAM_RING,
+               AudioManager.ADJUST_UNMUTE,
+             0
+           )
         }
 
+        testButton.setOnClickListener {
+            Toast.makeText(this, audioManager.getRingerMode().toString(), Toast.LENGTH_SHORT).show()
+        }
 
     }
 }

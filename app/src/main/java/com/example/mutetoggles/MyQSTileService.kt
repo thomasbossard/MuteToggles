@@ -8,6 +8,11 @@ import android.content.IntentFilter
 import android.media.AudioManager
 import android.service.quicksettings.TileService
 import android.widget.Toast
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class MyQSTileService : TileService() {
 
@@ -18,6 +23,8 @@ class MyQSTileService : TileService() {
     private val notificationManager: NotificationManager by lazy {
         getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
+
+    private val mutex = Mutex()
 
     // Called when the user adds your tile.
     override fun onTileAdded() {
@@ -39,23 +46,63 @@ class MyQSTileService : TileService() {
 
     // Called when the user taps on your tile in an active or inactive state.
     override fun onClick() {
-        // Check if Do Not Disturb access is granted
-        if (notificationManager.isNotificationPolicyAccessGranted) {
-            val ringerMode = audioManager.ringerMode
-            val newRingerMode = (ringerMode + 1) % 3  // Cycle between 0, 1, and 2
-
-            // Change the ringer mode
-            audioManager.ringerMode = newRingerMode
-
-            notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)
+        CoroutineScope(Dispatchers.Main).launch {
+            mutex.withLock {
+                // Check if Do Not Disturb access is granted
+                if (notificationManager.isNotificationPolicyAccessGranted) {
+                    val ringerMode = audioManager.ringerMode
+                    val newRingerMode = (ringerMode + 1) % 3  // Cycle between 0, 1, and 2
 
 
-            updateTile()  // Update the tile UI
-        } else {
-            Toast.makeText(this, "Do Not Disturb Permissions are not granted.", Toast.LENGTH_SHORT).show()
+
+                    when (newRingerMode) {
+                        0 -> { audioManager.ringerMode =
+                                AudioManager.RINGER_MODE_NORMAL // Ensure the mode is Normal
+                            audioManager.ringerMode = AudioManager.RINGER_MODE_SILENT
+                         //   notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL) //WHY DOES THIS CHANGE EL FLAGO  ?? WHY GOOGLE ???? Perhaps Race condition
+                            audioManager.adjustStreamVolume(
+                                AudioManager.STREAM_RING,
+                                AudioManager.ADJUST_MUTE,
+                                0
+                            )
+                            notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL) //THE ORDER HERE IS CRUCIAL ??? VERIFY WITH MUTEX /COROUTINES
+                            updateTile()
+                        }
+
+                        1 -> {
+                            audioManager.ringerMode = AudioManager.RINGER_MODE_VIBRATE
+                            updateTile()
+                        }
+
+                        2 -> {
+                            audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+                            audioManager.adjustStreamVolume(
+                                AudioManager.STREAM_RING,
+                                AudioManager.ADJUST_UNMUTE,
+                                0
+                            )
+                            updateTile()
+                        }
+                    }
+                }
+
+                // Change the ringer mode
+                // audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+                //audioManager.ringerMode = newRingerMode
+
+                // notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)
+
+                //    updateTile()  // Update the tile UI
+                else {
+                    Toast.makeText(
+                        this@MyQSTileService,
+                        "Do Not Disturb Permissions are not granted.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
     }
-
     // Called when the user removes your tile.
     override fun onTileRemoved() {
         super.onTileRemoved()
@@ -64,8 +111,14 @@ class MyQSTileService : TileService() {
     // BroadcastReceiver to listen for ringer mode changes
     private val ringerModeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            updateTile() // Update the tile when the ringer mode changes
+            CoroutineScope(Dispatchers.Main).launch {
+                mutex.withLock {
+                    updateTile() // Update the tile when the ringer mode changes
+                }
+            }
+
         }
+
     }
 
     // Function to update the Quick Settings tile UI
